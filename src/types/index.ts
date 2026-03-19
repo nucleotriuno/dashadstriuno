@@ -60,3 +60,8 @@ export type TimeWindow =
   | '30dias'
   | 'este-mes'
   | 'mes-passado';
+
+export interface Account {
+  id: string;
+  name: string;
+}
