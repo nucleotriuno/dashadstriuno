@@ -5,6 +5,7 @@
 CREATE TABLE IF NOT EXISTS meta_ad_metrics (
   ad_id           TEXT NOT NULL,
   date_ref        TEXT NOT NULL,
+  account_id      TEXT NOT NULL DEFAULT '',
   ad_name         TEXT,
   adset_id        TEXT,
   adset_name      TEXT,
@@ -25,6 +26,9 @@ CREATE TABLE IF NOT EXISTS meta_ad_metrics (
   PRIMARY KEY (ad_id, date_ref)
 );
 
+CREATE INDEX IF NOT EXISTS idx_metrics_account_date
+  ON meta_ad_metrics (account_id, date_ref);
+
 -- Account info
 CREATE TABLE IF NOT EXISTS meta_account (
   account_id    TEXT PRIMARY KEY,
@@ -34,11 +38,13 @@ CREATE TABLE IF NOT EXISTS meta_account (
   updated_at    TEXT DEFAULT (datetime('now'))
 );
 
--- Monthly financial data
+-- Monthly financial data (PK composta: account + mês)
 CREATE TABLE IF NOT EXISTS meta_financeiro (
-  month_start TEXT PRIMARY KEY,
+  account_id  TEXT NOT NULL,
+  month_start TEXT NOT NULL,
   spend       REAL DEFAULT 0,
   tax         REAL DEFAULT 0,
   total       REAL DEFAULT 0,
-  updated_at  TEXT DEFAULT (datetime('now'))
+  updated_at  TEXT DEFAULT (datetime('now')),
+  PRIMARY KEY (account_id, month_start)
 );
