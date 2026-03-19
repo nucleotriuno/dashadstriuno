@@ -128,7 +128,8 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
       dateRange: { startDate, endDate },
     });
   } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
     console.error(e);
-    return Response.json({ error: 'Internal server error', success: false }, { status: 500 });
+    return Response.json({ error: msg, success: false }, { status: 500 });
   }
 };
