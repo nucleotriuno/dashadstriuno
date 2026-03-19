@@ -49,6 +49,7 @@ export function extractCostPerResult(
 
 export async function fetchMetaInsights(
   env: Env,
+  accountId: string,
   startDate: string,
   endDate: string
 ): Promise<MetaInsightRow[]> {
@@ -67,7 +68,7 @@ export async function fetchMetaInsights(
     access_token: env.META_ACCESS_TOKEN,
   });
 
-  const url = `${BASE}/${env.META_AD_ACCOUNT_ID}/insights?${params}`;
+  const url = `${BASE}/${accountId}/insights?${params}`;
   const rows: MetaInsightRow[] = [];
   let nextUrl: string | null = url;
 
@@ -88,7 +89,7 @@ export async function fetchMetaInsights(
   return rows;
 }
 
-export async function fetchAccountInfo(env: Env): Promise<{
+export async function fetchAccountInfo(env: Env, accountId: string): Promise<{
   name: string;
   currency: string;
   timezone_name: string;
@@ -98,7 +99,7 @@ export async function fetchAccountInfo(env: Env): Promise<{
     fields: 'name,currency,timezone_name,account_id',
     access_token: env.META_ACCESS_TOKEN,
   });
-  const url = `${BASE}/${env.META_AD_ACCOUNT_ID}?${params}`;
+  const url = `${BASE}/${accountId}?${params}`;
   const res = await fetch(url);
   if (!res.ok) {
     const err = await res.json() as { error?: { message: string } };
@@ -120,6 +121,7 @@ interface MonthlySpendRow {
 
 export async function fetchMonthlySpend(
   env: Env,
+  accountId: string,
   sinceDate: string
 ): Promise<MonthlySpendRow[]> {
   const today = todaySP();
@@ -130,7 +132,7 @@ export async function fetchMonthlySpend(
     time_range: JSON.stringify({ since: sinceDate, until: today }),
     access_token: env.META_ACCESS_TOKEN,
   });
-  const url = `${BASE}/${env.META_AD_ACCOUNT_ID}/insights?${params}`;
+  const url = `${BASE}/${accountId}/insights?${params}`;
   const rows: MonthlySpendRow[] = [];
   let nextUrl: string | null = url;
 
