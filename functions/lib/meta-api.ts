@@ -1,4 +1,5 @@
 import type { Env } from './types';
+import { todaySP } from './date-utils';
 
 const BASE = 'https://graph.facebook.com/v21.0';
 
@@ -121,7 +122,7 @@ export async function fetchMonthlySpend(
   env: Env,
   sinceDate: string
 ): Promise<MonthlySpendRow[]> {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todaySP();
   const params = new URLSearchParams({
     level: 'account',
     time_increment: 'monthly',
@@ -130,11 +131,22 @@ export async function fetchMonthlySpend(
     access_token: env.META_ACCESS_TOKEN,
   });
   const url = `${BASE}/${env.META_AD_ACCOUNT_ID}/insights?${params}`;
-  const res = await fetch(url);
-  if (!res.ok) {
-    const err = await res.json() as { error?: { message: string } };
-    throw new Error(err.error?.message ?? `Meta API error ${res.status}`);
+  const rows: MonthlySpendRow[] = [];
+  let nextUrl: string | null = url;
+
+  while (nextUrl) {
+    const res = await fetch(nextUrl);
+    if (!res.ok) {
+      const err = await res.json() as { error?: { message: string } };
+      throw new Error(err.error?.message ?? `Meta API error ${res.status}`);
+    }
+    const json = await res.json() as {
+      data: MonthlySpendRow[];
+      paging?: { next?: string };
+    };
+    rows.push(...json.data);
+    nextUrl = json.paging?.next ?? null;
   }
-  const json = await res.json() as { data: MonthlySpendRow[] };
-  return json.data;
+
+  return rows;
 }

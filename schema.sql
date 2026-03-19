@@ -1,3 +1,6 @@
+-- NOTE: updated_at uses DEFAULT (datetime('now')) for INSERT only.
+-- Upsert SQL must explicitly set updated_at = datetime('now') in ON CONFLICT DO UPDATE SET.
+
 -- Meta ad metrics (daily, per ad)
 CREATE TABLE IF NOT EXISTS meta_ad_metrics (
   ad_id           TEXT NOT NULL,
