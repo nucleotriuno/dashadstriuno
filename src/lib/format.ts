@@ -24,6 +24,7 @@ export function formatNumber(value: number): string {
   return value.toLocaleString('pt-BR');
 }
 
+// Uses string splitting instead of Date construction to avoid UTC-midnight timezone shift
 export function formatDateBR(dateStr: string): string {
   const [y, m, d] = dateStr.split('-');
   return `${d}/${m}/${y}`;

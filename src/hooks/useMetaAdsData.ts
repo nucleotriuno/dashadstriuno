@@ -18,7 +18,7 @@ interface MetaAdsData {
   accountName: string | null;
 }
 
-export function useMetaAdsData(window: TimeWindow): MetaAdsData {
+export function useMetaAdsData(timeWindow: TimeWindow): MetaAdsData {
   const [kpis, setKpis] = useState<KPIs | null>(null);
   const [timeseries, setTimeseries] = useState<TimeseriesPoint[]>([]);
   const [campaigns, setCampaigns] = useState<CampaignRow[]>([]);
@@ -32,7 +32,7 @@ export function useMetaAdsData(window: TimeWindow): MetaAdsData {
     setLoading(true);
     setError(null);
 
-    const { startDate, endDate } = getDateRange(window);
+    const { startDate, endDate } = getDateRange(timeWindow);
     const params = { startDate, endDate };
 
     Promise.all([
@@ -60,7 +60,7 @@ export function useMetaAdsData(window: TimeWindow): MetaAdsData {
     return () => {
       cancelled = true;
     };
-  }, [window]);
+  }, [timeWindow]);
 
   return { kpis, timeseries, campaigns, ads, loading, error, accountName };
 }

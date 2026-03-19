@@ -80,3 +80,8 @@ body::after {
 .pulse-dot {
   animation: pulse-dot 2s ease-in-out infinite;
 }
+
+/* Table row hover */
+.data-table tr:hover td {
+  background: var(--surface-alt);
+}

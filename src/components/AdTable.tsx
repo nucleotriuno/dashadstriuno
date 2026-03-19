@@ -51,7 +51,7 @@ export function AdTable({ data, loading }: Props) {
         Por Anúncio
       </div>
       <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <table className="data-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr>
               <th style={TH}>Anúncio</th>
@@ -81,13 +81,6 @@ export function AdTable({ data, loading }: Props) {
                   key={row.adId}
                   className="fade-up"
                   style={{ animationDelay: `${i * 0.04}s` }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLTableRowElement).style.background =
-                      'var(--surface-alt)';
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLTableRowElement).style.background = 'transparent';
-                  }}
                 >
                   <td style={TD}>{row.adName}</td>
                   <td style={{ ...TD, textAlign: 'right', color: 'var(--amber)' }}>

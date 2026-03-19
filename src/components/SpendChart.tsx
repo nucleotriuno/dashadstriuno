@@ -68,7 +68,9 @@ export function SpendChart({ data, loading }: Props) {
               tickLine={false}
             />
             <YAxis
-              tickFormatter={(v: number) => `R$${v.toFixed(0)}`}
+              tickFormatter={(v: number) =>
+                v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 })
+              }
               tick={{ fontSize: 11, fontFamily: 'var(--mono)', fill: 'var(--text-dim)' }}
               axisLine={false}
               tickLine={false}

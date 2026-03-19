@@ -51,7 +51,7 @@ export function CampaignTable({ data, loading }: Props) {
         Por Campanha
       </div>
       <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <table className="data-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr>
               <th style={TH}>Campanha</th>
@@ -83,15 +83,6 @@ export function CampaignTable({ data, loading }: Props) {
                   className="fade-up"
                   style={{
                     animationDelay: `${i * 0.04}s`,
-                    background: 'transparent',
-                    cursor: 'default',
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLTableRowElement).style.background =
-                      'var(--surface-alt)';
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLTableRowElement).style.background = 'transparent';
                   }}
                 >
                   <td style={TD}>{row.campaignName}</td>
