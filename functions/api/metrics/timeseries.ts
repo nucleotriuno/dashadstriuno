@@ -10,9 +10,10 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     const url = new URL(request.url);
     const startDate = url.searchParams.get('startDate');
     const endDate = url.searchParams.get('endDate');
+    const accountId = url.searchParams.get('accountId');
 
-    if (!startDate || !endDate) {
-      return Response.json({ error: 'startDate and endDate required' }, { status: 400 });
+    if (!startDate || !endDate || !accountId) {
+      return Response.json({ error: 'startDate, endDate and accountId required' }, { status: 400 });
     }
 
     const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -20,19 +21,16 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
       return Response.json({ error: 'Dates must be in YYYY-MM-DD format' }, { status: 400 });
     }
 
-    const rows = await env.DB.prepare(`
+    const result = await env.DB.prepare(`
       SELECT date_ref, COALESCE(SUM(spend), 0) AS spend
       FROM meta_ad_metrics
-      WHERE date_ref >= ? AND date_ref <= ?
+      WHERE account_id = ? AND date_ref >= ? AND date_ref <= ?
       GROUP BY date_ref
       ORDER BY date_ref ASC
-    `).bind(startDate, endDate).all<TSRow>();
+    `).bind(accountId, startDate, endDate).all<TSRow>();
 
     return Response.json(
-      (rows.results ?? []).map((r) => ({
-        date: r.date_ref,
-        valorUsado: r.spend,
-      }))
+      (result.results ?? []).map((r) => ({ date: r.date_ref, valorUsado: r.spend }))
     );
   } catch (e) {
     console.error(e);

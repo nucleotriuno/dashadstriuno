@@ -15,15 +15,22 @@ interface FinRow {
   updated_at: string;
 }
 
-export const onRequestGet: PagesFunction<Env> = async ({ env }) => {
+export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   try {
+    const url = new URL(request.url);
+    const accountId = url.searchParams.get('accountId');
+
+    if (!accountId) {
+      return Response.json({ error: 'accountId required' }, { status: 400 });
+    }
+
     const account = await env.DB.prepare(
-      'SELECT account_id, name, currency, timezone_name FROM meta_account LIMIT 1'
-    ).first<AccountRow>();
+      'SELECT account_id, name, currency, timezone_name FROM meta_account WHERE account_id = ?'
+    ).bind(accountId).first<AccountRow>();
 
     const months = await env.DB.prepare(
-      'SELECT * FROM meta_financeiro ORDER BY month_start ASC'
-    ).all<FinRow>();
+      'SELECT month_start, spend, tax, total, updated_at FROM meta_financeiro WHERE account_id = ? ORDER BY month_start ASC'
+    ).bind(accountId).all<FinRow>();
 
     const latestUpdated = (months.results ?? []).reduce(
       (latest, r) => (r.updated_at > latest ? r.updated_at : latest),
@@ -32,12 +39,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ env }) => {
 
     return Response.json({
       account: account
-        ? {
-            name: account.name,
-            accountId: account.account_id,
-            currency: account.currency,
-            timezone: account.timezone_name,
-          }
+        ? { name: account.name, accountId: account.account_id, currency: account.currency, timezone: account.timezone_name }
         : null,
       months: (months.results ?? []).map((r) => ({
         monthStart: r.month_start,

@@ -12,9 +12,10 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     const url = new URL(request.url);
     const startDate = url.searchParams.get('startDate');
     const endDate = url.searchParams.get('endDate');
+    const accountId = url.searchParams.get('accountId');
 
-    if (!startDate || !endDate) {
-      return Response.json({ error: 'startDate and endDate required' }, { status: 400 });
+    if (!startDate || !endDate || !accountId) {
+      return Response.json({ error: 'startDate, endDate and accountId required' }, { status: 400 });
     }
 
     const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -29,8 +30,8 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
         COALESCE(SUM(reach), 0)        AS reach,
         COALESCE(SUM(link_clicks), 0)  AS link_clicks
       FROM meta_ad_metrics
-      WHERE date_ref >= ? AND date_ref <= ?
-    `).bind(startDate, endDate).first<KPIRow>();
+      WHERE account_id = ? AND date_ref >= ? AND date_ref <= ?
+    `).bind(accountId, startDate, endDate).first<KPIRow>();
 
     const spend = row?.spend ?? 0;
     const impressions = row?.impressions ?? 0;
@@ -41,13 +42,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     const ctr = impressions > 0 ? (link_clicks / impressions) * 100 : 0;
     const frequencia = reach > 0 ? impressions / reach : 0;
 
-    return Response.json({
-      valorUsado: spend,
-      alcance: reach,
-      ctr,
-      cpm,
-      frequencia,
-    });
+    return Response.json({ valorUsado: spend, alcance: reach, ctr, cpm, frequencia });
   } catch (e) {
     console.error(e);
     return Response.json({ error: 'Internal server error' }, { status: 500 });
