@@ -1,8 +1,5 @@
 import { NavLink } from 'react-router-dom';
-
-interface Props {
-  accountName: string | null;
-}
+import { useAccount } from '../context/AccountContext';
 
 const navItemStyle = (isActive: boolean): React.CSSProperties => ({
   display: 'flex',
@@ -19,7 +16,9 @@ const navItemStyle = (isActive: boolean): React.CSSProperties => ({
   transition: 'all 0.15s',
 });
 
-export function Sidebar({ accountName }: Props) {
+export function Sidebar() {
+  const { accounts, selectedAccount, setSelectedAccount } = useAccount();
+
   return (
     <aside
       style={{
@@ -38,14 +37,7 @@ export function Sidebar({ accountName }: Props) {
     >
       {/* Logo / Brand */}
       <div style={{ marginBottom: 20, padding: '0 4px' }}>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            marginBottom: 4,
-          }}
-        >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
           <div
             style={{
               width: 28,
@@ -60,47 +52,63 @@ export function Sidebar({ accountName }: Props) {
               fontSize: 13,
               fontWeight: 700,
               color: 'var(--accent)',
+              flexShrink: 0,
             }}
           >
             B
           </div>
-          <div>
-            <div
-              style={{
-                fontFamily: 'var(--sans)',
-                fontSize: 12,
-                fontWeight: 600,
-                color: 'var(--text)',
-                maxWidth: 150,
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {accountName ?? '...'}
-            </div>
-            <div
-              style={{
-                fontFamily: 'var(--sans)',
-                fontSize: 11,
-                color: 'var(--text-muted)',
-              }}
-            >
+          <div style={{ minWidth: 0, flex: 1 }}>
+            {accounts.length > 1 ? (
+              <select
+                value={selectedAccount?.id ?? ''}
+                onChange={(e) => {
+                  const found = accounts.find((a) => a.id === e.target.value);
+                  if (found) setSelectedAccount(found);
+                }}
+                style={{
+                  width: '100%',
+                  background: 'var(--surface-alt)',
+                  border: '1px solid var(--border-light)',
+                  borderRadius: 5,
+                  color: 'var(--text)',
+                  fontFamily: 'var(--sans)',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  padding: '3px 6px',
+                  cursor: 'pointer',
+                  outline: 'none',
+                }}
+              >
+                {accounts.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.name}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <div
+                style={{
+                  fontFamily: 'var(--sans)',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: 'var(--text)',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {selectedAccount?.name ?? '...'}
+              </div>
+            )}
+            <div style={{ fontFamily: 'var(--sans)', fontSize: 11, color: 'var(--text-muted)' }}>
               Meta Dashboard
             </div>
           </div>
         </div>
       </div>
 
-      <div
-        style={{
-          borderTop: '1px solid var(--border)',
-          margin: '0 -12px',
-          marginBottom: 16,
-        }}
-      />
+      <div style={{ borderTop: '1px solid var(--border)', margin: '0 -12px', marginBottom: 16 }} />
 
-      {/* Nav section label */}
       <div
         style={{
           fontFamily: 'var(--sans)',
@@ -126,17 +134,9 @@ export function Sidebar({ accountName }: Props) {
         Financeiro
       </NavLink>
 
-      {/* Bottom footer */}
       <div style={{ marginTop: 'auto' }}>
         <div style={{ borderTop: '1px solid var(--border)', margin: '0 -12px 12px' }} />
-        <div
-          style={{
-            fontFamily: 'var(--sans)',
-            fontSize: 10,
-            color: 'var(--text-muted)',
-            padding: '0 4px',
-          }}
-        >
+        <div style={{ fontFamily: 'var(--sans)', fontSize: 10, color: 'var(--text-muted)', padding: '0 4px' }}>
           Meta Marketing API
         </div>
       </div>
