@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//usr/local/lib/**)",
+      "Read(//opt/homebrew/lib/**)",
+      "Bash(mdfind -name node -onlyin /usr/local)",
+      "Bash(mdfind -name npm -onlyin /opt/homebrew)",
+      "Bash(pkgutil --pkgs)",
+      "Bash(brew list:*)",
+      "Bash(brew install:*)",
+      "Bash(export PATH=\"/opt/homebrew/bin:$PATH\")",
+      "Bash(npm --version)",
+      "Bash(npm create:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "Bash(git init:*)",
+      "Bash(git -C /Users/lucasrinaldi/Triuno add package.json vite.config.ts tsconfig.json tsconfig.node.json .npmrc index.html .gitignore)",
+      "Bash(git -C /Users/lucasrinaldi/Triuno status)",
+      "Bash(export GIT_AUTHOR_NAME=\"Lucas Rinaldi\")",
+      "Bash(export GIT_COMMITTER_NAME=\"Lucas Rinaldi\")",
+      "Bash(git -C:*)",
+      "Bash(git commit:*)",
+      "Bash(git add:*)",
+      "Bash(git rm:*)",
+      "Bash(grep -E \"\\\\.css$\")",
+      "Bash(node -e \":*)",
+      "Bash(wc -l /Users/lucasrinaldi/Triuno/functions/api/metrics/*.ts)",
+      "Bash(npx tsc:*)",
+      "Bash(npx eslint:*)"
+    ]
+  }
+}
