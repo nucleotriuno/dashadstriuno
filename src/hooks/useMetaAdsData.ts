@@ -1,12 +1,6 @@
 import { useState, useEffect } from 'react';
 import { apiFetch, getDateRange } from '../lib/api';
-import type {
-  KPIs,
-  TimeseriesPoint,
-  CampaignRow,
-  AdRow,
-  TimeWindow,
-} from '../types';
+import type { KPIs, TimeseriesPoint, CampaignRow, AdRow, TimeWindow } from '../types';
 
 interface MetaAdsData {
   kpis: KPIs | null;
@@ -15,40 +9,38 @@ interface MetaAdsData {
   ads: AdRow[];
   loading: boolean;
   error: string | null;
-  accountName: string | null;
 }
 
-export function useMetaAdsData(timeWindow: TimeWindow): MetaAdsData {
+export function useMetaAdsData(timeWindow: TimeWindow, accountId: string | null): MetaAdsData {
   const [kpis, setKpis] = useState<KPIs | null>(null);
   const [timeseries, setTimeseries] = useState<TimeseriesPoint[]>([]);
   const [campaigns, setCampaigns] = useState<CampaignRow[]>([]);
   const [ads, setAds] = useState<AdRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [accountName, setAccountName] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!accountId) return;
+
     let cancelled = false;
     setLoading(true);
     setError(null);
 
     const { startDate, endDate } = getDateRange(timeWindow);
-    const params = { startDate, endDate };
+    const params = { startDate, endDate, accountId };
 
     Promise.all([
       apiFetch<KPIs>('/api/metrics/kpis', params),
       apiFetch<TimeseriesPoint[]>('/api/metrics/timeseries', params),
       apiFetch<CampaignRow[]>('/api/metrics/campaigns', params),
       apiFetch<AdRow[]>('/api/metrics/ads', params),
-      apiFetch<{ account: { name: string } | null }>('/api/metrics/financeiro'),
     ])
-      .then(([k, ts, camp, a, fin]) => {
+      .then(([k, ts, camp, a]) => {
         if (cancelled) return;
         setKpis(k);
         setTimeseries(ts);
         setCampaigns(camp);
         setAds(a);
-        setAccountName(fin.account?.name ?? null);
         setLoading(false);
       })
       .catch((err: Error) => {
@@ -57,10 +49,8 @@ export function useMetaAdsData(timeWindow: TimeWindow): MetaAdsData {
         setLoading(false);
       });
 
-    return () => {
-      cancelled = true;
-    };
-  }, [timeWindow]);
+    return () => { cancelled = true; };
+  }, [timeWindow, accountId]);
 
-  return { kpis, timeseries, campaigns, ads, loading, error, accountName };
+  return { kpis, timeseries, campaigns, ads, loading, error };
 }

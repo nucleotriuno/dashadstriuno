@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { apiFetch } from '../lib/api';
 import { formatBRL, formatMonthBR } from '../lib/format';
+import { useAccount } from '../context/AccountContext';
 import type { FinanceiroData } from '../types';
 
 type YearFilter = 'todos' | '2025' | '2026';
@@ -10,6 +11,7 @@ const MONTH_ABBR = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set
 const YEAR_FILTERS: YearFilter[] = ['todos', '2025', '2026'];
 
 export function Financeiro() {
+  const { selectedAccount } = useAccount();
   const [data, setData] = useState<FinanceiroData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -17,8 +19,9 @@ export function Financeiro() {
   const [monthFilter, setMonthFilter] = useState<MonthFilter>(null);
 
   useEffect(() => {
+    if (!selectedAccount) return;
     setLoading(true);
-    apiFetch<FinanceiroData>('/api/metrics/financeiro')
+    apiFetch<FinanceiroData>('/api/metrics/financeiro', { accountId: selectedAccount.id })
       .then((d) => {
         setData(d);
         setLoading(false);
@@ -27,7 +30,7 @@ export function Financeiro() {
         setError(e.message);
         setLoading(false);
       });
-  }, []);
+  }, [selectedAccount?.id]);
 
   const months = data?.months ?? [];
 
@@ -70,7 +73,7 @@ export function Financeiro() {
     <div style={{ padding: '28px 32px', maxWidth: 1000 }}>
       {/* Header */}
       <div style={{ marginBottom: 24 }}>
-        {data?.account && (
+        {selectedAccount && (
           <div
             style={{
               display: 'inline-flex',
@@ -84,7 +87,7 @@ export function Financeiro() {
             }}
           >
             <span style={{ fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--text-dim)' }}>
-              {data.account.name}
+              {selectedAccount.name}
             </span>
           </div>
         )}
@@ -221,131 +224,50 @@ export function Financeiro() {
           <tbody>
             {loading ? (
               <tr>
-                <td
-                  colSpan={4}
-                  style={{
-                    fontFamily: 'var(--mono)',
-                    fontSize: 13,
-                    color: 'var(--text-muted)',
-                    padding: '20px',
-                    textAlign: 'center',
-                  }}
-                >
+                <td colSpan={4} style={{ fontFamily: 'var(--mono)', fontSize: 13, color: 'var(--text-muted)', padding: '20px', textAlign: 'center' }}>
                   Carregando...
                 </td>
               </tr>
             ) : filtered.length === 0 ? (
               <tr>
-                <td
-                  colSpan={4}
-                  style={{
-                    fontFamily: 'var(--mono)',
-                    fontSize: 13,
-                    color: 'var(--text-muted)',
-                    padding: '20px',
-                    textAlign: 'center',
-                  }}
-                >
+                <td colSpan={4} style={{ fontFamily: 'var(--mono)', fontSize: 13, color: 'var(--text-muted)', padding: '20px', textAlign: 'center' }}>
                   Sem dados
                 </td>
               </tr>
             ) : (
               filtered.map((m, i) => (
                 <tr key={m.monthStart} className="fade-up" style={{ animationDelay: `${i * 0.04}s` }}>
-                  <td
-                    style={{
-                      fontFamily: 'var(--sans)',
-                      fontSize: 13,
-                      color: 'var(--text)',
-                      padding: '10px 16px',
-                      borderBottom: '1px solid var(--border)',
-                    }}
-                  >
+                  <td style={{ fontFamily: 'var(--sans)', fontSize: 13, color: 'var(--text)', padding: '10px 16px', borderBottom: '1px solid var(--border)' }}>
                     {formatMonthBR(m.monthStart)}
                   </td>
-                  <td
-                    style={{
-                      fontFamily: 'var(--mono)',
-                      fontSize: 13,
-                      color: 'var(--text)',
-                      padding: '10px 16px',
-                      borderBottom: '1px solid var(--border)',
-                      textAlign: 'right',
-                    }}
-                  >
+                  <td style={{ fontFamily: 'var(--mono)', fontSize: 13, color: 'var(--text)', padding: '10px 16px', borderBottom: '1px solid var(--border)', textAlign: 'right' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 8 }}>
-                      <div
-                        style={{
-                          width: Math.round((m.spend / maxSpend) * 80),
-                          height: 4,
-                          background: 'var(--accent)',
-                          borderRadius: 2,
-                          opacity: 0.5,
-                        }}
-                      />
+                      <div style={{ width: Math.round((m.spend / maxSpend) * 80), height: 4, background: 'var(--accent)', borderRadius: 2, opacity: 0.5 }} />
                       {formatBRL(m.spend)}
                     </div>
                   </td>
-                  <td
-                    style={{
-                      fontFamily: 'var(--mono)',
-                      fontSize: 13,
-                      color: m.tax > 0 ? 'var(--amber)' : 'var(--text-muted)',
-                      padding: '10px 16px',
-                      borderBottom: '1px solid var(--border)',
-                      textAlign: 'right',
-                    }}
-                  >
+                  <td style={{ fontFamily: 'var(--mono)', fontSize: 13, color: m.tax > 0 ? 'var(--amber)' : 'var(--text-muted)', padding: '10px 16px', borderBottom: '1px solid var(--border)', textAlign: 'right' }}>
                     {m.tax > 0 ? formatBRL(m.tax) : '—'}
                   </td>
-                  <td
-                    style={{
-                      fontFamily: 'var(--mono)',
-                      fontSize: 13,
-                      fontWeight: 600,
-                      color: 'var(--text)',
-                      padding: '10px 16px',
-                      borderBottom: '1px solid var(--border)',
-                      textAlign: 'right',
-                    }}
-                  >
+                  <td style={{ fontFamily: 'var(--mono)', fontSize: 13, fontWeight: 600, color: 'var(--text)', padding: '10px 16px', borderBottom: '1px solid var(--border)', textAlign: 'right' }}>
                     {formatBRL(m.total)}
                   </td>
                 </tr>
               ))
             )}
-            {/* Totals row */}
             {!loading && filtered.length > 0 && (
               <tr style={{ background: 'var(--surface-alt)' }}>
-                <td style={{ fontFamily: 'var(--sans)', fontSize: 12, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-muted)', padding: '10px 16px' }}>
-                  Total
-                </td>
-                <td style={{ fontFamily: 'var(--mono)', fontSize: 13, fontWeight: 700, color: 'var(--accent)', padding: '10px 16px', textAlign: 'right' }}>
-                  {formatBRL(totalSpend)}
-                </td>
-                <td style={{ fontFamily: 'var(--mono)', fontSize: 13, fontWeight: 700, color: 'var(--amber)', padding: '10px 16px', textAlign: 'right' }}>
-                  {totalTax > 0 ? formatBRL(totalTax) : '—'}
-                </td>
-                <td style={{ fontFamily: 'var(--mono)', fontSize: 13, fontWeight: 700, color: 'var(--text)', padding: '10px 16px', textAlign: 'right' }}>
-                  {formatBRL(totalTotal)}
-                </td>
+                <td style={{ fontFamily: 'var(--sans)', fontSize: 12, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-muted)', padding: '10px 16px' }}>Total</td>
+                <td style={{ fontFamily: 'var(--mono)', fontSize: 13, fontWeight: 700, color: 'var(--accent)', padding: '10px 16px', textAlign: 'right' }}>{formatBRL(totalSpend)}</td>
+                <td style={{ fontFamily: 'var(--mono)', fontSize: 13, fontWeight: 700, color: 'var(--amber)', padding: '10px 16px', textAlign: 'right' }}>{totalTax > 0 ? formatBRL(totalTax) : '—'}</td>
+                <td style={{ fontFamily: 'var(--mono)', fontSize: 13, fontWeight: 700, color: 'var(--text)', padding: '10px 16px', textAlign: 'right' }}>{formatBRL(totalTotal)}</td>
               </tr>
             )}
           </tbody>
         </table>
 
-        {/* Timestamp */}
         {data?.updatedAt && (
-          <div
-            style={{
-              fontFamily: 'var(--mono)',
-              fontSize: 11,
-              color: 'var(--text-muted)',
-              padding: '10px 16px',
-              borderTop: '1px solid var(--border)',
-              textAlign: 'right',
-            }}
-          >
+          <div style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--text-muted)', padding: '10px 16px', borderTop: '1px solid var(--border)', textAlign: 'right' }}>
             Atualizado em{' '}
             {new Date(data.updatedAt).toLocaleString('pt-BR', {
               timeZone: 'America/Sao_Paulo',

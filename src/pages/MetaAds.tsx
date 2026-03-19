@@ -5,18 +5,20 @@ import { SpendChart } from '../components/SpendChart';
 import { CampaignTable } from '../components/CampaignTable';
 import { AdTable } from '../components/AdTable';
 import { useMetaAdsData } from '../hooks/useMetaAdsData';
+import { useAccount } from '../context/AccountContext';
 import type { TimeWindow } from '../types';
 
 export function MetaAds() {
   const [timeWindow, setTimeWindow] = useState<TimeWindow>('30dias');
-  const { kpis, timeseries, campaigns, ads, loading, error, accountName } =
-    useMetaAdsData(timeWindow);
+  const { selectedAccount } = useAccount();
+  const { kpis, timeseries, campaigns, ads, loading, error } =
+    useMetaAdsData(timeWindow, selectedAccount?.id ?? null);
 
   return (
     <div style={{ padding: '28px 32px', maxWidth: 1200 }}>
       {/* Header */}
       <div style={{ marginBottom: 24 }}>
-        {accountName && (
+        {selectedAccount && (
           <div
             style={{
               display: 'inline-flex',
@@ -46,7 +48,7 @@ export function MetaAds() {
                 color: 'var(--text-dim)',
               }}
             >
-              {accountName}
+              {selectedAccount.name}
             </span>
           </div>
         )}
