@@ -17,6 +17,11 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
       return Response.json({ error: 'startDate and endDate required' }, { status: 400 });
     }
 
+    const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+    if (!DATE_RE.test(startDate) || !DATE_RE.test(endDate)) {
+      return Response.json({ error: 'Dates must be in YYYY-MM-DD format' }, { status: 400 });
+    }
+
     const row = await env.DB.prepare(`
       SELECT
         COALESCE(SUM(spend), 0)        AS spend,
@@ -44,6 +49,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
       frequencia,
     });
   } catch (e) {
-    return Response.json({ error: String(e) }, { status: 500 });
+    console.error(e);
+    return Response.json({ error: 'Internal server error' }, { status: 500 });
   }
 };

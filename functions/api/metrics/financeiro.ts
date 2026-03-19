@@ -18,7 +18,7 @@ interface FinRow {
 export const onRequestGet: PagesFunction<Env> = async ({ env }) => {
   try {
     const account = await env.DB.prepare(
-      'SELECT * FROM meta_account LIMIT 1'
+      'SELECT account_id, name, currency, timezone_name FROM meta_account LIMIT 1'
     ).first<AccountRow>();
 
     const months = await env.DB.prepare(
@@ -48,6 +48,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ env }) => {
       updatedAt: latestUpdated,
     });
   } catch (e) {
-    return Response.json({ error: String(e) }, { status: 500 });
+    console.error(e);
+    return Response.json({ error: 'Internal server error' }, { status: 500 });
   }
 };

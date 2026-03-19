@@ -47,7 +47,7 @@ export interface FinanceiroMonth {
 }
 
 export interface FinanceiroData {
-  account: AccountInfo;
+  account: AccountInfo | null;
   months: FinanceiroMonth[];
   updatedAt: string;
 }
