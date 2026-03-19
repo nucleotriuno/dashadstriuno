@@ -1,0 +1,8 @@
+name = "meta-ads-dashboard"
+compatibility_date = "2024-09-23"
+pages_build_output_dir = "dist"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "meta-dash-db"
+database_id = "PLACEHOLDER_DATABASE_ID"
