@@ -1,4 +1,4 @@
-import { formatInTimeZone } from 'date-fns-tz';
+import { formatInTimeZone, toZonedTime } from 'date-fns-tz';
 import { subDays, startOfMonth, endOfMonth, subMonths } from 'date-fns';
 import type { TimeWindow } from '../types';
 
@@ -30,14 +30,16 @@ export function getDateRange(window: TimeWindow): { startDate: string; endDate: 
         endDate: today,
       };
     case 'este-mes': {
-      const start = startOfMonth(now);
+      const nowInTZ = toZonedTime(now, TZ);
+      const start = startOfMonth(nowInTZ);
       return {
         startDate: formatInTimeZone(start, TZ, 'yyyy-MM-dd'),
         endDate: today,
       };
     }
     case 'mes-passado': {
-      const lastMonth = subMonths(now, 1);
+      const nowInTZ = toZonedTime(now, TZ);
+      const lastMonth = subMonths(nowInTZ, 1);
       const start = startOfMonth(lastMonth);
       const end = endOfMonth(lastMonth);
       return {
@@ -48,7 +50,7 @@ export function getDateRange(window: TimeWindow): { startDate: string; endDate: 
   }
 }
 
-async function apiFetch<T>(path: string, params?: Record<string, string>): Promise<T> {
+export async function apiFetch<T>(path: string, params?: Record<string, string>): Promise<T> {
   const url = new URL(path, window.location.origin);
   if (params) {
     Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
@@ -60,5 +62,3 @@ async function apiFetch<T>(path: string, params?: Record<string, string>): Promi
   }
   return res.json() as Promise<T>;
 }
-
-export { apiFetch };
