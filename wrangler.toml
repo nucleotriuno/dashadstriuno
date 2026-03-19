@@ -5,4 +5,4 @@ pages_build_output_dir = "dist"
 [[d1_databases]]
 binding = "DB"
 database_name = "meta-dash-db"
-database_id = "PLACEHOLDER_DATABASE_ID"
+database_id = "51148488-b820-48e3-badc-885a696b6c9b"
