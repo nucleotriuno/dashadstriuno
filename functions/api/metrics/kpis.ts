@@ -8,6 +8,10 @@ interface KPIRow {
   resultados: number;
 }
 
+interface AccountRow {
+  updated_at: string;
+}
+
 export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   try {
     const url = new URL(request.url);
@@ -23,6 +27,10 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     if (!DATE_RE.test(startDate) || !DATE_RE.test(endDate)) {
       return Response.json({ error: 'Dates must be in YYYY-MM-DD format' }, { status: 400 });
     }
+
+    const account = await env.DB.prepare(
+      'SELECT updated_at FROM meta_account WHERE account_id = ?'
+    ).bind(accountId).first<AccountRow>();
 
     const row = await env.DB.prepare(`
       SELECT
@@ -46,7 +54,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     const frequencia = reach > 0 ? impressions / reach : 0;
     const cpl = resultados > 0 ? spend / resultados : 0;
 
-    return Response.json({ valorUsado: spend, alcance: reach, ctr, cpm, frequencia, leads: resultados, cpl });
+    return Response.json({ valorUsado: spend, alcance: reach, ctr, cpm, frequencia, leads: resultados, cpl, updatedAt: account?.updated_at ?? null });
   } catch (e) {
     console.error(e);
     return Response.json({ error: 'Internal server error' }, { status: 500 });

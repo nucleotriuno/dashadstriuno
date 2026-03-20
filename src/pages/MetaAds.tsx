@@ -11,7 +11,7 @@ import type { TimeWindow } from '../types';
 export function MetaAds() {
   const [timeWindow, setTimeWindow] = useState<TimeWindow>('30dias');
   const { selectedAccount } = useAccount();
-  const { kpis, timeseries, campaigns, ads, loading, error } =
+  const { kpis, timeseries, campaigns, ads, updatedAt, loading, error } =
     useMetaAdsData(timeWindow, selectedAccount?.id ?? null);
 
   return (
@@ -68,11 +68,24 @@ export function MetaAds() {
             fontFamily: 'var(--sans)',
             fontSize: 14,
             color: 'var(--text-dim)',
-            margin: 0,
+            margin: '0 0 4px',
           }}
         >
           Relatório geral da conta
         </p>
+        {updatedAt && (
+          <p style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--text-muted)', margin: 0 }}>
+            Atualizado em{' '}
+            {new Date(updatedAt).toLocaleString('pt-BR', {
+              timeZone: 'America/Sao_Paulo',
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
+            })}
+          </p>
+        )}
       </div>
 
       {/* Time window picker */}

@@ -6,6 +6,7 @@ export interface KPIs {
   frequencia: number;
   leads: number;
   cpl: number;
+  updatedAt: string | null;
 }
 
 export interface TimeseriesPoint {

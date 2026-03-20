@@ -7,6 +7,7 @@ interface MetaAdsData {
   timeseries: TimeseriesPoint[];
   campaigns: CampaignRow[];
   ads: AdRow[];
+  updatedAt: string | null;
   loading: boolean;
   error: string | null;
 }
@@ -16,6 +17,7 @@ export function useMetaAdsData(timeWindow: TimeWindow, accountId: string | null)
   const [timeseries, setTimeseries] = useState<TimeseriesPoint[]>([]);
   const [campaigns, setCampaigns] = useState<CampaignRow[]>([]);
   const [ads, setAds] = useState<AdRow[]>([]);
+  const [updatedAt, setUpdatedAt] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -41,6 +43,7 @@ export function useMetaAdsData(timeWindow: TimeWindow, accountId: string | null)
         setTimeseries(ts);
         setCampaigns(camp);
         setAds(a);
+        setUpdatedAt(k.updatedAt ?? null);
         setLoading(false);
       })
       .catch((err: Error) => {
@@ -52,5 +55,5 @@ export function useMetaAdsData(timeWindow: TimeWindow, accountId: string | null)
     return () => { cancelled = true; };
   }, [timeWindow, accountId]);
 
-  return { kpis, timeseries, campaigns, ads, loading, error };
+  return { kpis, timeseries, campaigns, ads, updatedAt, loading, error };
 }
