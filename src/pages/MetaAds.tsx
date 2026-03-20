@@ -25,64 +25,30 @@ const BTN: React.CSSProperties = {
   transition: 'color 0.15s, border-color 0.15s',
 };
 
-function exportCSV(accountName: string, campaigns: ReturnType<typeof useMetaAdsData>['campaigns'], ads: ReturnType<typeof useMetaAdsData>['ads']) {
-  const rows: string[] = [];
-
-  rows.push('=== CAMPANHAS ===');
-  rows.push('Campanha,Valor Usado,Alcance,CPM,CTR,Leads,CPL');
-  for (const c of campaigns) {
-    rows.push([
-      `"${c.campaignName}"`,
-      c.valorUsado.toFixed(2),
-      c.alcance,
-      c.cpm.toFixed(2),
-      c.ctr.toFixed(2) + '%',
-      c.resultados,
-      c.custoPorResultado > 0 ? c.custoPorResultado.toFixed(2) : '0',
-    ].join(','));
-  }
-
-  rows.push('');
-  rows.push('=== ANÚNCIOS ===');
-  rows.push('Anúncio,Valor Usado,Alcance,CPM,CTR,Impressões,Leads,CPL');
-  for (const a of ads) {
-    rows.push([
-      `"${a.adName}"`,
-      a.valorUsado.toFixed(2),
-      a.alcance,
-      a.cpm.toFixed(2),
-      a.ctr.toFixed(2) + '%',
-      a.impressions,
-      a.resultados,
-      a.custoPorResultado > 0 ? a.custoPorResultado.toFixed(2) : '0',
-    ].join(','));
-  }
-
-  const blob = new Blob(['\uFEFF' + rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `meta-ads-${accountName.replace(/\s+/g, '-')}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
 export function MetaAds() {
   const [timeWindow, setTimeWindow] = useState<TimeWindow>('30dias');
-  const [copied, setCopied] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
+  const [copiedEmbed, setCopiedEmbed] = useState(false);
   const { selectedAccount } = useAccount();
   const { kpis, timeseries, campaigns, ads, updatedAt, loading, error } =
     useMetaAdsData(timeWindow, selectedAccount?.id ?? null);
 
-  const embedUrl = selectedAccount
+  const clientUrl = selectedAccount
     ? `${window.location.origin}/meta-ads?account=${selectedAccount.id}`
     : '';
-  const embedCode = `<iframe src="${embedUrl}" width="100%" height="800" frameborder="0" style="border-radius:12px"></iframe>`;
+  const embedCode = `<iframe src="${clientUrl}" width="100%" height="800" frameborder="0" style="border-radius:12px"></iframe>`;
+
+  function handleCopyLink() {
+    navigator.clipboard.writeText(clientUrl).then(() => {
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 2000);
+    });
+  }
 
   function handleEmbed() {
     navigator.clipboard.writeText(embedCode).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setCopiedEmbed(true);
+      setTimeout(() => setCopiedEmbed(false), 2000);
     });
   }
 
@@ -156,17 +122,16 @@ export function MetaAds() {
           {selectedAccount && (
             <div style={{ display: 'flex', gap: 8, flexShrink: 0, paddingTop: 4 }}>
               <button
-                style={BTN}
-                onClick={() => exportCSV(selectedAccount.name, campaigns, ads)}
-                disabled={loading || campaigns.length === 0}
+                style={{ ...BTN, color: copiedLink ? 'var(--green)' : 'var(--text-dim)', borderColor: copiedLink ? 'var(--green)' : 'var(--border-light)' }}
+                onClick={handleCopyLink}
               >
-                ↓ Exportar CSV
+                {copiedLink ? '✓ Copiado!' : '↗ Link do Cliente'}
               </button>
               <button
-                style={{ ...BTN, color: copied ? 'var(--green)' : 'var(--text-dim)', borderColor: copied ? 'var(--green)' : 'var(--border-light)' }}
+                style={{ ...BTN, color: copiedEmbed ? 'var(--green)' : 'var(--text-dim)', borderColor: copiedEmbed ? 'var(--green)' : 'var(--border-light)' }}
                 onClick={handleEmbed}
               >
-                {copied ? '✓ Copiado!' : '</> Embed'}
+                {copiedEmbed ? '✓ Copiado!' : '</> Embed'}
               </button>
             </div>
           )}
