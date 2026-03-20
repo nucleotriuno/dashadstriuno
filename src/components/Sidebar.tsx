@@ -17,7 +17,7 @@ const navItemStyle = (isActive: boolean): React.CSSProperties => ({
 });
 
 export function Sidebar() {
-  const { accounts, selectedAccount, setSelectedAccount } = useAccount();
+  const { accounts, selectedAccount, setSelectedAccount, isLocked } = useAccount();
 
   return (
     <aside
@@ -58,7 +58,7 @@ export function Sidebar() {
             B
           </div>
           <div style={{ minWidth: 0, flex: 1 }}>
-            {accounts.length > 1 ? (
+            {accounts.length > 1 && !isLocked ? (
               <select
                 value={selectedAccount?.id ?? ''}
                 onChange={(e) => {
