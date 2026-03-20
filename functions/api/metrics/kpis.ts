@@ -29,8 +29,8 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     }
 
     const account = await env.DB.prepare(
-      'SELECT updated_at FROM meta_account WHERE account_id = ?'
-    ).bind(accountId).first<AccountRow>();
+      'SELECT updated_at FROM meta_account WHERE account_id = ? OR account_id = ?'
+    ).bind(accountId, accountId.replace(/^act_/, '')).first<AccountRow>();
 
     const row = await env.DB.prepare(`
       SELECT

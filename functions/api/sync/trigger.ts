@@ -97,7 +97,7 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
         currency      = excluded.currency,
         timezone_name = excluded.timezone_name,
         updated_at    = datetime('now')
-    `).bind(account.account_id, account.name, account.currency, account.timezone_name).run();
+    `).bind(accountId, account.name, account.currency, account.timezone_name).run();
 
     // 4. Fetch monthly spend and upsert financeiro
     const monthlySpend = await fetchMonthlySpend(env, accountId, '2025-01-01');
