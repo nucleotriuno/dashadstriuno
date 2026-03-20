@@ -19,6 +19,16 @@ const CARDS: CardDef[] = [
     color: 'var(--amber)',
   },
   {
+    label: 'Leads',
+    value: (k) => formatNumber(k.leads),
+    color: 'var(--green)',
+  },
+  {
+    label: 'CPL',
+    value: (k) => formatBRL(k.cpl),
+    color: 'var(--red)',
+  },
+  {
     label: 'Alcance',
     value: (k) => formatNumber(k.alcance),
     color: 'var(--accent)',
@@ -26,7 +36,7 @@ const CARDS: CardDef[] = [
   {
     label: 'CTR',
     value: (k) => formatPercent(k.ctr),
-    color: 'var(--green)',
+    color: 'var(--text-dim)',
   },
   {
     label: 'CPM',

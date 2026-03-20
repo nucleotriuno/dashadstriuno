@@ -36,7 +36,10 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
         COALESCE(SUM(impressions), 0)     AS impressions,
         COALESCE(SUM(link_clicks), 0)     AS link_clicks,
         COALESCE(SUM(resultados), 0)      AS resultados,
-        COALESCE(AVG(custo_resultado), 0) AS custo_resultado
+        CASE WHEN COALESCE(SUM(resultados), 0) > 0
+          THEN SUM(spend) / SUM(resultados)
+          ELSE 0
+        END AS custo_resultado
       FROM meta_ad_metrics
       WHERE account_id = ? AND date_ref >= ? AND date_ref <= ?
       GROUP BY campaign_id, campaign_name

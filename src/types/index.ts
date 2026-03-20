@@ -4,6 +4,8 @@ export interface KPIs {
   ctr: number;
   cpm: number;
   frequencia: number;
+  leads: number;
+  cpl: number;
 }
 
 export interface TimeseriesPoint {
