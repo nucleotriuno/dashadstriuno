@@ -31,8 +31,8 @@
   --sidebar-w: 220px;
 
   /* Font tokens */
-  --mono: 'JetBrains Mono', monospace;
-  --sans: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --mono: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 body {
@@ -84,4 +84,9 @@ body::after {
 /* Table row hover */
 .data-table tr:hover td {
   background: var(--surface-alt);
+}
+
+/* Tabular numbers for numeric elements using --mono */
+[style*="--mono"] {
+  font-feature-settings: "tnum", "ss01";
 }
