@@ -59,8 +59,8 @@ export function CampaignTable({ data, loading }: Props) {
               <th style={{ ...TH, textAlign: 'right' }}>Alcance</th>
               <th style={{ ...TH, textAlign: 'right' }}>CPM</th>
               <th style={{ ...TH, textAlign: 'right' }}>CTR</th>
-              <th style={{ ...TH, textAlign: 'right' }}>Resultados</th>
-              <th style={{ ...TH, textAlign: 'right' }}>Custo/Result.</th>
+              <th style={{ ...TH, textAlign: 'right' }}>Leads</th>
+              <th style={{ ...TH, textAlign: 'right' }}>CPL</th>
             </tr>
           </thead>
           <tbody>

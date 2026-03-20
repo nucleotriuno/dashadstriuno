@@ -7,6 +7,8 @@ interface AdRow {
   reach: number;
   impressions: number;
   link_clicks: number;
+  resultados: number;
+  custo_resultado: number;
 }
 
 export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
@@ -32,7 +34,12 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
         COALESCE(SUM(spend), 0)       AS spend,
         COALESCE(SUM(reach), 0)       AS reach,
         COALESCE(SUM(impressions), 0) AS impressions,
-        COALESCE(SUM(link_clicks), 0) AS link_clicks
+        COALESCE(SUM(link_clicks), 0) AS link_clicks,
+        COALESCE(SUM(resultados), 0)  AS resultados,
+        CASE WHEN COALESCE(SUM(resultados), 0) > 0
+          THEN SUM(spend) / SUM(resultados)
+          ELSE 0
+        END AS custo_resultado
       FROM meta_ad_metrics
       WHERE account_id = ? AND date_ref >= ? AND date_ref <= ?
       GROUP BY ad_id, ad_name
@@ -48,6 +55,8 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
         cpm: r.impressions > 0 ? (r.spend / r.impressions) * 1000 : 0,
         ctr: r.impressions > 0 ? (r.link_clicks / r.impressions) * 100 : 0,
         impressions: r.impressions,
+        resultados: r.resultados,
+        custoPorResultado: r.custo_resultado,
       }))
     );
   } catch (e) {

@@ -60,18 +60,20 @@ export function AdTable({ data, loading }: Props) {
               <th style={{ ...TH, textAlign: 'right' }}>CPM</th>
               <th style={{ ...TH, textAlign: 'right' }}>CTR</th>
               <th style={{ ...TH, textAlign: 'right' }}>Impressões</th>
+              <th style={{ ...TH, textAlign: 'right' }}>Leads</th>
+              <th style={{ ...TH, textAlign: 'right' }}>CPL</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={6} style={{ ...TD, textAlign: 'center', color: 'var(--text-muted)' }}>
+                <td colSpan={8} style={{ ...TD, textAlign: 'center', color: 'var(--text-muted)' }}>
                   Carregando...
                 </td>
               </tr>
             ) : data.length === 0 ? (
               <tr>
-                <td colSpan={6} style={{ ...TD, textAlign: 'center', color: 'var(--text-muted)' }}>
+                <td colSpan={8} style={{ ...TD, textAlign: 'center', color: 'var(--text-muted)' }}>
                   Sem dados
                 </td>
               </tr>
@@ -92,6 +94,12 @@ export function AdTable({ data, loading }: Props) {
                     {formatPercent(row.ctr)}
                   </td>
                   <td style={{ ...TD, textAlign: 'right' }}>{formatNumber(row.impressions)}</td>
+                  <td style={{ ...TD, textAlign: 'right', color: 'var(--green)' }}>
+                    {row.resultados > 0 ? formatNumber(row.resultados) : '—'}
+                  </td>
+                  <td style={{ ...TD, textAlign: 'right', color: 'var(--red)' }}>
+                    {row.custoPorResultado > 0 ? formatBRL(row.custoPorResultado) : '—'}
+                  </td>
                 </tr>
               ))
             )}
