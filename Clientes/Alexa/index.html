@@ -420,6 +420,12 @@ img {
   inset: 0;
 }
 
+/* Corrige foto tirada de lado (paisagem → retrato) */
+.sobre__photo-img {
+  transform: rotate(-90deg) scale(1.5);
+  transform-origin: center center;
+}
+
 .sobre__photo-placeholder {
   font-size: 9px;
   letter-spacing: 2px;
@@ -1193,8 +1199,7 @@ img {
   </div>
   <div class="sobre__content">
     <div class="sobre__photo">
-      <!-- Replace with: <img src="assets/sobre-foto.jpg" alt="Semijoias Alexa — peças elegantes e refinadas" width="180" height="240" loading="lazy"> -->
-      <span class="sobre__photo-placeholder" aria-hidden="true">foto</span>
+      <img src="assets/sobre-foto.JPG" alt="Semijoias Alexa — peças elegantes e refinadas" width="180" height="240" loading="lazy" class="sobre__photo-img">
     </div>
     <div class="sobre__text">
       <p class="sobre__label">Sobre a marca</p>
