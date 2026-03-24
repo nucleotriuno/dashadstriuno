@@ -67,6 +67,7 @@ img {
   text-decoration: none;
   cursor: pointer;
   border: none;
+  touch-action: manipulation;
   transition: background 0.2s, color 0.2s, opacity 0.2s;
 }
 
@@ -694,6 +695,7 @@ img {
   color: var(--dark);
   transition: border-color 0.2s;
   min-height: 44px;
+  touch-action: manipulation;
 }
 
 .field__input::placeholder {
@@ -916,6 +918,7 @@ img {
   font-weight: 400;
   color: var(--dark);
   line-height: 1.5;
+  touch-action: manipulation;
   transition: color 0.2s;
 }
 
@@ -1321,6 +1324,7 @@ img {
               id="whatsapp"
               name="whatsapp"
               type="tel"
+              inputmode="numeric"
               autocomplete="tel"
               placeholder="(00) 00000-0000"
               required
