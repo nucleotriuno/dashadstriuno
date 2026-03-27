@@ -87,20 +87,30 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
       await env.DB.batch(stmts.slice(i, i + 100));
     }
 
-    // 3. Fetch and upsert account info
-    const account = await fetchAccountInfo(env, accountId);
-    await env.DB.prepare(`
-      INSERT INTO meta_account (account_id, name, currency, timezone_name, updated_at)
-      VALUES (?, ?, ?, ?, datetime('now'))
-      ON CONFLICT(account_id) DO UPDATE SET
-        name          = excluded.name,
-        currency      = excluded.currency,
-        timezone_name = excluded.timezone_name,
-        updated_at    = datetime('now')
-    `).bind(accountId, account.name, account.currency, account.timezone_name).run();
+    // 3. Fetch and upsert account info (resilient — always stamps updated_at)
+    try {
+      const account = await fetchAccountInfo(env, accountId);
+      await env.DB.prepare(`
+        INSERT INTO meta_account (account_id, name, currency, timezone_name, updated_at)
+        VALUES (?, ?, ?, ?, datetime('now'))
+        ON CONFLICT(account_id) DO UPDATE SET
+          name          = excluded.name,
+          currency      = excluded.currency,
+          timezone_name = excluded.timezone_name,
+          updated_at    = datetime('now')
+      `).bind(accountId, account.name, account.currency, account.timezone_name).run();
+    } catch {
+      // Fallback: just stamp updated_at even if Meta API fails for account info
+      await env.DB.prepare(`
+        INSERT INTO meta_account (account_id, name, currency, timezone_name, updated_at)
+        VALUES (?, ?, '', '', datetime('now'))
+        ON CONFLICT(account_id) DO UPDATE SET updated_at = datetime('now')
+      `).bind(accountId, accountId).run();
+    }
 
-    // 4. Fetch monthly spend and upsert financeiro
-    const monthlySpend = await fetchMonthlySpend(env, accountId, '2025-01-01');
+    // 4. Fetch current-month financeiro only (backfill is a separate operation)
+    const currentMonthStart = startDate.substring(0, 7) + '-01';
+    const monthlySpend = await fetchMonthlySpend(env, accountId, currentMonthStart);
     const finStmts = monthlySpend.map((m) => {
       const spend = parseFloat(m.spend ?? '0');
       const applyTax = m.date_start >= TAX_START;
