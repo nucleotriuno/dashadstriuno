@@ -8,8 +8,8 @@ interface KPIRow {
   resultados: number;
 }
 
-interface AccountRow {
-  updated_at: string;
+interface SyncRow {
+  last_sync: string | null;
 }
 
 export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
@@ -28,20 +28,21 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
       return Response.json({ error: 'Dates must be in YYYY-MM-DD format' }, { status: 400 });
     }
 
-    const account = await env.DB.prepare(
-      'SELECT updated_at FROM meta_account WHERE account_id = ? OR account_id = ?'
-    ).bind(accountId, accountId.replace(/^act_/, '')).first<AccountRow>();
-
-    const row = await env.DB.prepare(`
-      SELECT
-        COALESCE(SUM(spend), 0)        AS spend,
-        COALESCE(SUM(impressions), 0)  AS impressions,
-        COALESCE(SUM(reach), 0)        AS reach,
-        COALESCE(SUM(link_clicks), 0)  AS link_clicks,
-        COALESCE(SUM(resultados), 0)   AS resultados
-      FROM meta_ad_metrics
-      WHERE account_id = ? AND date_ref >= ? AND date_ref <= ?
-    `).bind(accountId, startDate, endDate).first<KPIRow>();
+    const [row, syncRow] = await Promise.all([
+      env.DB.prepare(`
+        SELECT
+          COALESCE(SUM(spend), 0)        AS spend,
+          COALESCE(SUM(impressions), 0)  AS impressions,
+          COALESCE(SUM(reach), 0)        AS reach,
+          COALESCE(SUM(link_clicks), 0)  AS link_clicks,
+          COALESCE(SUM(resultados), 0)   AS resultados
+        FROM meta_ad_metrics
+        WHERE account_id = ? AND date_ref >= ? AND date_ref <= ?
+      `).bind(accountId, startDate, endDate).first<KPIRow>(),
+      env.DB.prepare(
+        'SELECT MAX(updated_at) AS last_sync FROM meta_ad_metrics WHERE account_id = ?'
+      ).bind(accountId).first<SyncRow>(),
+    ]);
 
     const spend = row?.spend ?? 0;
     const impressions = row?.impressions ?? 0;
@@ -54,7 +55,10 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     const frequencia = reach > 0 ? impressions / reach : 0;
     const cpl = resultados > 0 ? spend / resultados : 0;
 
-    return Response.json({ valorUsado: spend, alcance: reach, ctr, cpm, frequencia, leads: resultados, cpl, updatedAt: account?.updated_at ?? null }, { headers: { 'Cache-Control': 'no-store' } });
+    return Response.json(
+      { valorUsado: spend, alcance: reach, ctr, cpm, frequencia, leads: resultados, cpl, updatedAt: syncRow?.last_sync ?? null },
+      { headers: { 'Cache-Control': 'no-store' } }
+    );
   } catch (e) {
     console.error(e);
     return Response.json({ error: 'Internal server error' }, { status: 500 });
