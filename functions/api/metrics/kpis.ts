@@ -54,7 +54,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     const frequencia = reach > 0 ? impressions / reach : 0;
     const cpl = resultados > 0 ? spend / resultados : 0;
 
-    return Response.json({ valorUsado: spend, alcance: reach, ctr, cpm, frequencia, leads: resultados, cpl, updatedAt: account?.updated_at ?? null });
+    return Response.json({ valorUsado: spend, alcance: reach, ctr, cpm, frequencia, leads: resultados, cpl, updatedAt: account?.updated_at ?? null }, { headers: { 'Cache-Control': 'no-store' } });
   } catch (e) {
     console.error(e);
     return Response.json({ error: 'Internal server error' }, { status: 500 });

@@ -57,7 +57,8 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
         impressions: r.impressions,
         resultados: r.resultados,
         custoPorResultado: r.custo_resultado,
-      }))
+      })),
+      { headers: { 'Cache-Control': 'no-store' } }
     );
   } catch (e) {
     console.error(e);

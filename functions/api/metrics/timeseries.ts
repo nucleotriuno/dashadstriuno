@@ -30,7 +30,8 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     `).bind(accountId, startDate, endDate).all<TSRow>();
 
     return Response.json(
-      (result.results ?? []).map((r) => ({ date: r.date_ref, valorUsado: r.spend }))
+      (result.results ?? []).map((r) => ({ date: r.date_ref, valorUsado: r.spend })),
+      { headers: { 'Cache-Control': 'no-store' } }
     );
   } catch (e) {
     console.error(e);

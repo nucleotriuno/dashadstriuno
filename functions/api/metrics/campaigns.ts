@@ -56,7 +56,8 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
         ctr: r.impressions > 0 ? (r.link_clicks / r.impressions) * 100 : 0,
         resultados: r.resultados,
         custoPorResultado: r.custo_resultado,
-      }))
+      })),
+      { headers: { 'Cache-Control': 'no-store' } }
     );
   } catch (e) {
     console.error(e);

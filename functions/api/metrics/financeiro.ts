@@ -48,7 +48,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
         total: r.total,
       })),
       updatedAt: latestUpdated,
-    });
+    }, { headers: { 'Cache-Control': 'no-store' } });
   } catch (e) {
     console.error(e);
     return Response.json({ error: 'Internal server error' }, { status: 500 });
