@@ -131,11 +131,16 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
       await env.DB.batch(finStmts);
     }
 
+    const accountRow = await env.DB.prepare(
+      'SELECT updated_at FROM meta_account WHERE account_id = ?'
+    ).bind(accountId).first<{ updated_at: string }>();
+
     return Response.json({
       success: true,
       synced: insights.length,
       financeiro: monthlySpend.length,
       dateRange: { startDate, endDate },
+      accountUpdatedAt: accountRow?.updated_at ?? null,
     });
   } catch (e) {
     console.error(e);
