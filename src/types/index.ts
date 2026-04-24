@@ -12,6 +12,7 @@ export interface KPIs {
 export interface TimeseriesPoint {
   date: string;
   valorUsado: number;
+  leads: number;
 }
 
 export interface CampaignRow {

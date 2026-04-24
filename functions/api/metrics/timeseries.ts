@@ -3,6 +3,7 @@ import type { Env } from '../../lib/types';
 interface TSRow {
   date_ref: string;
   spend: number;
+  leads: number;
 }
 
 export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
@@ -22,7 +23,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     }
 
     const result = await env.DB.prepare(`
-      SELECT date_ref, COALESCE(SUM(spend), 0) AS spend
+      SELECT date_ref, COALESCE(SUM(spend), 0) AS spend, COALESCE(SUM(resultados), 0) AS leads
       FROM meta_ad_metrics
       WHERE account_id = ? AND date_ref >= ? AND date_ref <= ?
       GROUP BY date_ref
@@ -30,7 +31,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     `).bind(accountId, startDate, endDate).all<TSRow>();
 
     return Response.json(
-      (result.results ?? []).map((r) => ({ date: r.date_ref, valorUsado: r.spend })),
+      (result.results ?? []).map((r) => ({ date: r.date_ref, valorUsado: r.spend, leads: r.leads })),
       { headers: { 'Cache-Control': 'no-store' } }
     );
   } catch (e) {

@@ -6,6 +6,7 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  Legend,
 } from 'recharts';
 import type { TimeseriesPoint } from '../types';
 import { formatBRL, formatDateBR } from '../lib/format';
@@ -68,6 +69,7 @@ export function SpendChart({ data, loading }: Props) {
               tickLine={false}
             />
             <YAxis
+              yAxisId="spend"
               tickFormatter={(v: number) =>
                 v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 })
               }
@@ -75,6 +77,15 @@ export function SpendChart({ data, loading }: Props) {
               axisLine={false}
               tickLine={false}
               width={70}
+            />
+            <YAxis
+              yAxisId="leads"
+              orientation="right"
+              allowDecimals={false}
+              tick={{ fontSize: 11, fontFamily: 'var(--mono)', fill: 'var(--text-dim)' }}
+              axisLine={false}
+              tickLine={false}
+              width={30}
             />
             <Tooltip
               contentStyle={{
@@ -84,13 +95,30 @@ export function SpendChart({ data, loading }: Props) {
                 fontFamily: 'var(--mono)',
                 fontSize: 12,
               }}
-              formatter={(value: unknown) => [formatBRL(value as number), 'Gasto']}
+              formatter={(value: unknown, name: unknown) =>
+                name === 'valorUsado'
+                  ? [formatBRL(value as number), 'Gasto']
+                  : [String(value), 'Leads']
+              }
               labelFormatter={(label: unknown) => formatDateBR(label as string)}
             />
+            <Legend
+              formatter={(value) => value === 'valorUsado' ? 'Gasto' : 'Leads'}
+              wrapperStyle={{ fontFamily: 'var(--mono)', fontSize: 11 }}
+            />
             <Line
+              yAxisId="spend"
               type="monotone"
               dataKey="valorUsado"
               stroke="var(--amber)"
+              strokeWidth={2}
+              dot={false}
+            />
+            <Line
+              yAxisId="leads"
+              type="monotone"
+              dataKey="leads"
+              stroke="var(--green)"
               strokeWidth={2}
               dot={false}
             />
