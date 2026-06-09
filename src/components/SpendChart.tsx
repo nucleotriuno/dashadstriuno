@@ -14,9 +14,22 @@ import { formatBRL, formatDateBR } from '../lib/format';
 interface Props {
   data: TimeseriesPoint[];
   loading: boolean;
+  objetivo?: string;
 }
 
-export function SpendChart({ data, loading }: Props) {
+function isEngagementLike(obj: string) {
+  return (
+    obj === 'OUTCOME_ENGAGEMENT' ||
+    obj === 'OUTCOME_TRAFFIC' ||
+    obj === 'OUTCOME_APP_PROMOTION'
+  );
+}
+
+export function SpendChart({ data, loading, objetivo = '' }: Props) {
+  const useConversas = isEngagementLike(objetivo);
+  const resultKey = useConversas ? 'conversas' : 'leads';
+  const resultLabel = useConversas ? 'Cliques' : 'Leads';
+
   return (
     <div
       style={{
@@ -98,12 +111,12 @@ export function SpendChart({ data, loading }: Props) {
               formatter={(value: unknown, name: unknown) =>
                 name === 'valorUsado'
                   ? [formatBRL(value as number), 'Gasto']
-                  : [String(value), 'Leads']
+                  : [String(value), resultLabel]
               }
               labelFormatter={(label: unknown) => formatDateBR(label as string)}
             />
             <Legend
-              formatter={(value) => value === 'valorUsado' ? 'Gasto' : 'Leads'}
+              formatter={(value) => value === 'valorUsado' ? 'Gasto' : resultLabel}
               wrapperStyle={{ fontFamily: 'var(--mono)', fontSize: 11 }}
             />
             <Line
@@ -117,7 +130,7 @@ export function SpendChart({ data, loading }: Props) {
             <Line
               yAxisId="leads"
               type="monotone"
-              dataKey="leads"
+              dataKey={resultKey}
               stroke="var(--green)"
               strokeWidth={2}
               dot={false}

@@ -83,7 +83,39 @@ function getRowMetrics(row: CampaignRow): RowMetrics {
   }
 }
 
+function getDominantObjetivo(rows: CampaignRow[]): string {
+  const counts: Record<string, number> = {};
+  for (const row of rows) {
+    const obj = resolveObjetivo(row);
+    if (obj) counts[obj] = (counts[obj] ?? 0) + 1;
+  }
+  let best = '';
+  let bestCount = 0;
+  for (const [obj, count] of Object.entries(counts)) {
+    if (count > bestCount) { best = obj; bestCount = count; }
+  }
+  return best;
+}
+
+function getHeaderLabels(objetivo: string) {
+  switch (objetivo) {
+    case 'OUTCOME_ENGAGEMENT':
+    case 'OUTCOME_TRAFFIC':
+    case 'OUTCOME_APP_PROMOTION':
+      return { resultadoHeader: 'Cliques', cprHeader: 'CPC' };
+    case 'OUTCOME_SALES':
+      return { resultadoHeader: 'Vendas', cprHeader: 'CPV' };
+    case 'OUTCOME_AWARENESS':
+      return { resultadoHeader: 'Alcance', cprHeader: 'CPM' };
+    default:
+      return { resultadoHeader: 'Leads', cprHeader: 'CPL' };
+  }
+}
+
 export function CampaignTable({ data, loading }: Props) {
+  const dominantObjetivo = getDominantObjetivo(data);
+  const { resultadoHeader, cprHeader } = getHeaderLabels(dominantObjetivo);
+
   return (
     <div
       style={{
@@ -116,8 +148,8 @@ export function CampaignTable({ data, loading }: Props) {
               <th style={{ ...TH, textAlign: 'right' }}>Alcance</th>
               <th style={{ ...TH, textAlign: 'right' }}>CPM</th>
               <th style={{ ...TH, textAlign: 'right' }}>CTR</th>
-              <th style={{ ...TH, textAlign: 'right' }}>Resultado</th>
-              <th style={{ ...TH, textAlign: 'right' }}>CPR</th>
+              <th style={{ ...TH, textAlign: 'right' }}>{resultadoHeader}</th>
+              <th style={{ ...TH, textAlign: 'right' }}>{cprHeader}</th>
             </tr>
           </thead>
           <tbody>
@@ -154,40 +186,10 @@ export function CampaignTable({ data, loading }: Props) {
                       {formatPercent(row.ctr)}
                     </td>
                     <td style={{ ...TD, textAlign: 'right', color: 'var(--green)' }}>
-                      <span title={m.resultadoLabel}>{formatNumber(m.resultado)}</span>
-                      <span
-                        style={{
-                          marginLeft: 4,
-                          fontSize: 10,
-                          color: 'var(--text-muted)',
-                          fontFamily: 'var(--sans)',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.06em',
-                        }}
-                      >
-                        {m.resultadoLabel}
-                      </span>
+                      {m.resultado > 0 ? formatNumber(m.resultado) : '—'}
                     </td>
                     <td style={{ ...TD, textAlign: 'right', color: 'var(--red)' }}>
-                      {m.cpr > 0 ? (
-                        <>
-                          {formatBRL(m.cpr)}
-                          <span
-                            style={{
-                              marginLeft: 4,
-                              fontSize: 10,
-                              color: 'var(--text-muted)',
-                              fontFamily: 'var(--sans)',
-                              textTransform: 'uppercase',
-                              letterSpacing: '0.06em',
-                            }}
-                          >
-                            {m.cprLabel}
-                          </span>
-                        </>
-                      ) : (
-                        '—'
-                      )}
+                      {m.cpr > 0 ? formatBRL(m.cpr) : '—'}
                     </td>
                   </tr>
                 );

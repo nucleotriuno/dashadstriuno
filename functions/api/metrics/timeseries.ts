@@ -4,6 +4,7 @@ interface TSRow {
   date_ref: string;
   spend: number;
   leads: number;
+  conversas: number;
 }
 
 export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
@@ -23,7 +24,11 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     }
 
     const result = await env.DB.prepare(`
-      SELECT date_ref, COALESCE(SUM(spend), 0) AS spend, COALESCE(SUM(resultados), 0) AS leads
+      SELECT
+        date_ref,
+        COALESCE(SUM(spend), 0)       AS spend,
+        COALESCE(SUM(resultados), 0)  AS leads,
+        COALESCE(SUM(link_clicks), 0) AS conversas
       FROM meta_ad_metrics
       WHERE account_id = ? AND date_ref >= ? AND date_ref <= ?
       GROUP BY date_ref
@@ -31,7 +36,12 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     `).bind(accountId, startDate, endDate).all<TSRow>();
 
     return Response.json(
-      (result.results ?? []).map((r) => ({ date: r.date_ref, valorUsado: r.spend, leads: r.leads })),
+      (result.results ?? []).map((r) => ({
+        date: r.date_ref,
+        valorUsado: r.spend,
+        leads: r.leads,
+        conversas: r.conversas,
+      })),
       { headers: { 'Cache-Control': 'no-store' } }
     );
   } catch (e) {

@@ -168,7 +168,7 @@ export function MetaAds() {
 
       {/* Spend Chart */}
       <div style={{ marginBottom: 20 }}>
-        <SpendChart data={timeseries} loading={loading} />
+        <SpendChart data={timeseries} loading={loading} objetivo={kpis?.objetivo ?? ''} />
       </div>
 
       {/* Campaign Table */}
@@ -177,7 +177,7 @@ export function MetaAds() {
       </div>
 
       {/* Ad Table */}
-      <AdTable data={ads} loading={loading} />
+      <AdTable data={ads} loading={loading} objetivo={kpis?.objetivo ?? ''} />
     </div>
   );
 }

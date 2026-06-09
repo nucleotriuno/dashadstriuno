@@ -4,6 +4,22 @@ import { formatBRL, formatNumber, formatPercent } from '../lib/format';
 interface Props {
   data: AdRow[];
   loading: boolean;
+  objetivo?: string;
+}
+
+function getAdLabels(objetivo: string) {
+  switch (objetivo) {
+    case 'OUTCOME_ENGAGEMENT':
+    case 'OUTCOME_TRAFFIC':
+    case 'OUTCOME_APP_PROMOTION':
+      return { resultadoLabel: 'Cliques', cprLabel: 'CPC', useCliques: true };
+    case 'OUTCOME_SALES':
+      return { resultadoLabel: 'Vendas', cprLabel: 'CPV', useCliques: false };
+    case 'OUTCOME_AWARENESS':
+      return { resultadoLabel: 'Alcance', cprLabel: 'CPM', useCliques: false };
+    default:
+      return { resultadoLabel: 'Leads', cprLabel: 'CPL', useCliques: false };
+  }
 }
 
 const TH: React.CSSProperties = {
@@ -26,7 +42,9 @@ const TD: React.CSSProperties = {
   borderBottom: '1px solid var(--border)',
 };
 
-export function AdTable({ data, loading }: Props) {
+export function AdTable({ data, loading, objetivo = '' }: Props) {
+  const { resultadoLabel, cprLabel, useCliques } = getAdLabels(objetivo);
+
   return (
     <div
       style={{
@@ -60,8 +78,8 @@ export function AdTable({ data, loading }: Props) {
               <th style={{ ...TH, textAlign: 'right' }}>CPM</th>
               <th style={{ ...TH, textAlign: 'right' }}>CTR</th>
               <th style={{ ...TH, textAlign: 'right' }}>Impressões</th>
-              <th style={{ ...TH, textAlign: 'right' }}>Leads</th>
-              <th style={{ ...TH, textAlign: 'right' }}>CPL</th>
+              <th style={{ ...TH, textAlign: 'right' }}>{resultadoLabel}</th>
+              <th style={{ ...TH, textAlign: 'right' }}>{cprLabel}</th>
             </tr>
           </thead>
           <tbody>
@@ -95,10 +113,14 @@ export function AdTable({ data, loading }: Props) {
                   </td>
                   <td style={{ ...TD, textAlign: 'right' }}>{formatNumber(row.impressions)}</td>
                   <td style={{ ...TD, textAlign: 'right', color: 'var(--green)' }}>
-                    {row.resultados > 0 ? formatNumber(row.resultados) : '—'}
+                    {useCliques
+                      ? (row.linkCliques > 0 ? formatNumber(row.linkCliques) : '—')
+                      : (row.resultados > 0 ? formatNumber(row.resultados) : '—')}
                   </td>
                   <td style={{ ...TD, textAlign: 'right', color: 'var(--red)' }}>
-                    {row.custoPorResultado > 0 ? formatBRL(row.custoPorResultado) : '—'}
+                    {useCliques
+                      ? (row.cpc > 0 ? formatBRL(row.cpc) : '—')
+                      : (row.custoPorResultado > 0 ? formatBRL(row.custoPorResultado) : '—')}
                   </td>
                 </tr>
               ))

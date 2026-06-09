@@ -55,6 +55,8 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
         cpm: r.impressions > 0 ? (r.spend / r.impressions) * 1000 : 0,
         ctr: r.impressions > 0 ? (r.link_clicks / r.impressions) * 100 : 0,
         impressions: r.impressions,
+        linkCliques: r.link_clicks,
+        cpc: r.link_clicks > 0 ? r.spend / r.link_clicks : 0,
         resultados: r.resultados,
         custoPorResultado: r.custo_resultado,
       })),

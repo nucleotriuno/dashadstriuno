@@ -19,6 +19,8 @@ export interface TimeseriesPoint {
   date: string;
   valorUsado: number;
   leads: number;
+  /** Link clicks — proxy result metric for engagement/traffic campaigns */
+  conversas: number;
 }
 
 export interface CampaignRow {
@@ -46,6 +48,8 @@ export interface AdRow {
   cpm: number;
   ctr: number;
   impressions: number;
+  linkCliques: number;
+  cpc: number;
   resultados: number;
   custoPorResultado: number;
 }
