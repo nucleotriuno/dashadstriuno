@@ -6,6 +6,12 @@ export interface KPIs {
   frequencia: number;
   leads: number;
   cpl: number;
+  /** Link clicks — proxy for engagement/traffic result metric */
+  conversas: number;
+  /** Cost per link click */
+  cpc: number;
+  /** Dominant campaign objective for the selected period (e.g. OUTCOME_ENGAGEMENT) */
+  objetivo: string;
   updatedAt: string | null;
 }
 
@@ -18,10 +24,16 @@ export interface TimeseriesPoint {
 export interface CampaignRow {
   campaignId: string;
   campaignName: string;
+  /** Campaign objective from Meta API (e.g. OUTCOME_ENGAGEMENT, OUTCOME_LEADS) */
+  objetivo: string;
   valorUsado: number;
   alcance: number;
   cpm: number;
   ctr: number;
+  /** Link clicks — correct metric for traffic/engagement campaigns */
+  linkCliques: number;
+  /** Cost per link click */
+  cpc: number;
   resultados: number;
   custoPorResultado: number;
 }

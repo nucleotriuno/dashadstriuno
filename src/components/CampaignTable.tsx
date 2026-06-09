@@ -26,6 +26,63 @@ const TD: React.CSSProperties = {
   borderBottom: '1px solid var(--border)',
 };
 
+/** Infer objective from name when API column not yet populated */
+function inferObjetivoFromName(name: string): string {
+  const n = name.toUpperCase();
+  if (n.includes('ENGAJAMENTO') || n.includes('ENGAGEMENT')) return 'OUTCOME_ENGAGEMENT';
+  if (n.includes('TRAFEGO') || n.includes('TRÁFEGO') || n.includes('TRAFFIC')) return 'OUTCOME_TRAFFIC';
+  if (n.includes('VENDA') || n.includes('SALE') || n.includes('COMPRA')) return 'OUTCOME_SALES';
+  if (n.includes('AWARENESS') || n.includes('ALCANCE')) return 'OUTCOME_AWARENESS';
+  return '';
+}
+
+function resolveObjetivo(row: CampaignRow): string {
+  return row.objetivo || inferObjetivoFromName(row.campaignName);
+}
+
+interface RowMetrics {
+  resultado: number;
+  resultadoLabel: string;
+  cpr: number;
+  cprLabel: string;
+}
+
+function getRowMetrics(row: CampaignRow): RowMetrics {
+  const obj = resolveObjetivo(row);
+  switch (obj) {
+    case 'OUTCOME_ENGAGEMENT':
+    case 'OUTCOME_TRAFFIC':
+    case 'OUTCOME_APP_PROMOTION':
+      return {
+        resultado: row.linkCliques ?? 0,
+        resultadoLabel: 'Cliques',
+        cpr: row.cpc ?? 0,
+        cprLabel: 'CPC',
+      };
+    case 'OUTCOME_SALES':
+      return {
+        resultado: row.resultados,
+        resultadoLabel: 'Vendas',
+        cpr: row.custoPorResultado,
+        cprLabel: 'CPV',
+      };
+    case 'OUTCOME_AWARENESS':
+      return {
+        resultado: row.alcance,
+        resultadoLabel: 'Alcance',
+        cpr: row.cpm,
+        cprLabel: 'CPM',
+      };
+    default:
+      return {
+        resultado: row.resultados,
+        resultadoLabel: 'Leads',
+        cpr: row.custoPorResultado,
+        cprLabel: 'CPL',
+      };
+  }
+}
+
 export function CampaignTable({ data, loading }: Props) {
   return (
     <div
@@ -59,8 +116,8 @@ export function CampaignTable({ data, loading }: Props) {
               <th style={{ ...TH, textAlign: 'right' }}>Alcance</th>
               <th style={{ ...TH, textAlign: 'right' }}>CPM</th>
               <th style={{ ...TH, textAlign: 'right' }}>CTR</th>
-              <th style={{ ...TH, textAlign: 'right' }}>Leads</th>
-              <th style={{ ...TH, textAlign: 'right' }}>CPL</th>
+              <th style={{ ...TH, textAlign: 'right' }}>Resultado</th>
+              <th style={{ ...TH, textAlign: 'right' }}>CPR</th>
             </tr>
           </thead>
           <tbody>
@@ -77,31 +134,64 @@ export function CampaignTable({ data, loading }: Props) {
                 </td>
               </tr>
             ) : (
-              data.map((row, i) => (
-                <tr
-                  key={row.campaignId}
-                  className="fade-up"
-                  style={{
-                    animationDelay: `${i * 0.04}s`,
-                  }}
-                >
-                  <td style={TD}>{row.campaignName}</td>
-                  <td style={{ ...TD, textAlign: 'right', color: 'var(--amber)' }}>
-                    {formatBRL(row.valorUsado)}
-                  </td>
-                  <td style={{ ...TD, textAlign: 'right' }}>{formatNumber(row.alcance)}</td>
-                  <td style={{ ...TD, textAlign: 'right' }}>{formatBRL(row.cpm)}</td>
-                  <td style={{ ...TD, textAlign: 'right', color: 'var(--green)' }}>
-                    {formatPercent(row.ctr)}
-                  </td>
-                  <td style={{ ...TD, textAlign: 'right', color: 'var(--green)' }}>
-                    {formatNumber(row.resultados)}
-                  </td>
-                  <td style={{ ...TD, textAlign: 'right', color: 'var(--red)' }}>
-                    {row.custoPorResultado > 0 ? formatBRL(row.custoPorResultado) : '—'}
-                  </td>
-                </tr>
-              ))
+              data.map((row, i) => {
+                const m = getRowMetrics(row);
+                return (
+                  <tr
+                    key={row.campaignId}
+                    className="fade-up"
+                    style={{
+                      animationDelay: `${i * 0.04}s`,
+                    }}
+                  >
+                    <td style={TD}>{row.campaignName}</td>
+                    <td style={{ ...TD, textAlign: 'right', color: 'var(--amber)' }}>
+                      {formatBRL(row.valorUsado)}
+                    </td>
+                    <td style={{ ...TD, textAlign: 'right' }}>{formatNumber(row.alcance)}</td>
+                    <td style={{ ...TD, textAlign: 'right' }}>{formatBRL(row.cpm)}</td>
+                    <td style={{ ...TD, textAlign: 'right', color: 'var(--green)' }}>
+                      {formatPercent(row.ctr)}
+                    </td>
+                    <td style={{ ...TD, textAlign: 'right', color: 'var(--green)' }}>
+                      <span title={m.resultadoLabel}>{formatNumber(m.resultado)}</span>
+                      <span
+                        style={{
+                          marginLeft: 4,
+                          fontSize: 10,
+                          color: 'var(--text-muted)',
+                          fontFamily: 'var(--sans)',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.06em',
+                        }}
+                      >
+                        {m.resultadoLabel}
+                      </span>
+                    </td>
+                    <td style={{ ...TD, textAlign: 'right', color: 'var(--red)' }}>
+                      {m.cpr > 0 ? (
+                        <>
+                          {formatBRL(m.cpr)}
+                          <span
+                            style={{
+                              marginLeft: 4,
+                              fontSize: 10,
+                              color: 'var(--text-muted)',
+                              fontFamily: 'var(--sans)',
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.06em',
+                            }}
+                          >
+                            {m.cprLabel}
+                          </span>
+                        </>
+                      ) : (
+                        '—'
+                      )}
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>

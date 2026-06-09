@@ -12,49 +12,88 @@ interface CardDef {
   color: string;
 }
 
-const CARDS: CardDef[] = [
-  {
-    label: 'Valor Usado',
-    value: (k) => formatBRL(k.valorUsado),
-    color: 'var(--amber)',
-  },
-  {
-    label: 'Leads',
-    value: (k) => formatNumber(k.leads),
-    color: 'var(--green)',
-  },
-  {
-    label: 'CPL',
-    value: (k) => formatBRL(k.cpl),
-    color: 'var(--red)',
-  },
-  {
-    label: 'Alcance',
-    value: (k) => formatNumber(k.alcance),
-    color: 'var(--accent)',
-  },
-  {
-    label: 'CTR',
-    value: (k) => formatPercent(k.ctr),
-    color: 'var(--text-dim)',
-  },
-  {
-    label: 'CPM',
-    value: (k) => formatBRL(k.cpm),
-    color: 'var(--text-dim)',
-  },
-  {
-    label: 'Frequência',
-    value: (k) =>
-      k.frequencia.toLocaleString('pt-BR', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      }),
-    color: 'var(--purple)',
-  },
-];
+type Objetivo = string;
+
+function getObjetivoLabels(objetivo: Objetivo): { resultadoLabel: string; cprLabel: string } {
+  switch (objetivo) {
+    case 'OUTCOME_ENGAGEMENT':
+      return { resultadoLabel: 'Cliques', cprLabel: 'CPC' };
+    case 'OUTCOME_TRAFFIC':
+      return { resultadoLabel: 'Cliques', cprLabel: 'CPC' };
+    case 'OUTCOME_SALES':
+      return { resultadoLabel: 'Vendas', cprLabel: 'CPV' };
+    case 'OUTCOME_AWARENESS':
+      return { resultadoLabel: 'Alcance', cprLabel: 'CPM' };
+    case 'OUTCOME_APP_PROMOTION':
+      return { resultadoLabel: 'Cliques', cprLabel: 'CPC' };
+    default:
+      return { resultadoLabel: 'Leads', cprLabel: 'CPL' };
+  }
+}
+
+function buildCards(objetivo: Objetivo): CardDef[] {
+  const { resultadoLabel, cprLabel } = getObjetivoLabels(objetivo);
+  const isEngOrTraffic =
+    objetivo === 'OUTCOME_ENGAGEMENT' ||
+    objetivo === 'OUTCOME_TRAFFIC' ||
+    objetivo === 'OUTCOME_APP_PROMOTION';
+  const isAwareness = objetivo === 'OUTCOME_AWARENESS';
+
+  return [
+    {
+      label: 'Valor Usado',
+      value: (k) => formatBRL(k.valorUsado),
+      color: 'var(--amber)',
+    },
+    {
+      label: resultadoLabel,
+      value: (k) => {
+        if (isAwareness) return formatNumber(k.alcance);
+        if (isEngOrTraffic) return formatNumber(k.conversas ?? 0);
+        return formatNumber(k.leads);
+      },
+      color: 'var(--green)',
+    },
+    {
+      label: cprLabel,
+      value: (k) => {
+        if (isAwareness) return formatBRL(k.cpm);
+        if (isEngOrTraffic) return formatBRL(k.cpc ?? 0);
+        return formatBRL(k.cpl);
+      },
+      color: 'var(--red)',
+    },
+    {
+      label: 'Alcance',
+      value: (k) => formatNumber(k.alcance),
+      color: 'var(--accent)',
+    },
+    {
+      label: 'CTR',
+      value: (k) => formatPercent(k.ctr),
+      color: 'var(--text-dim)',
+    },
+    {
+      label: 'CPM',
+      value: (k) => formatBRL(k.cpm),
+      color: 'var(--text-dim)',
+    },
+    {
+      label: 'Frequência',
+      value: (k) =>
+        k.frequencia.toLocaleString('pt-BR', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }),
+      color: 'var(--purple)',
+    },
+  ];
+}
 
 export function KPICards({ kpis, loading }: Props) {
+  const objetivo = kpis?.objetivo ?? '';
+  const CARDS = buildCards(objetivo);
+
   return (
     <div
       style={{

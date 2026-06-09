@@ -12,6 +12,10 @@ interface SyncRow {
   last_sync: string | null;
 }
 
+interface ObjRow {
+  campaign_objective: string;
+}
+
 export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   try {
     const url = new URL(request.url);
@@ -54,9 +58,33 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     const ctr = impressions > 0 ? (link_clicks / impressions) * 100 : 0;
     const frequencia = reach > 0 ? impressions / reach : 0;
     const cpl = resultados > 0 ? spend / resultados : 0;
+    const cpc = link_clicks > 0 ? spend / link_clicks : 0;
+
+    // Detect dominant campaign objective (graceful fallback if column not yet migrated)
+    let objetivo = '';
+    try {
+      const objRow = await env.DB.prepare(`
+        SELECT campaign_objective
+        FROM meta_ad_metrics
+        WHERE account_id = ? AND date_ref >= ? AND date_ref <= ?
+          AND campaign_objective IS NOT NULL AND campaign_objective != ''
+        GROUP BY campaign_objective
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+      `).bind(accountId, startDate, endDate).first<ObjRow>();
+      objetivo = objRow?.campaign_objective ?? '';
+    } catch {
+      // column not yet migrated — leave objetivo empty
+    }
 
     return Response.json(
-      { valorUsado: spend, alcance: reach, ctr, cpm, frequencia, leads: resultados, cpl, updatedAt: syncRow?.last_sync ?? null },
+      {
+        valorUsado: spend, alcance: reach, ctr, cpm, frequencia,
+        leads: resultados, cpl,
+        conversas: link_clicks, cpc,
+        objetivo,
+        updatedAt: syncRow?.last_sync ?? null,
+      },
       { headers: { 'Cache-Control': 'no-store' } }
     );
   } catch (e) {
