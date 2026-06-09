@@ -41,25 +41,26 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
       env.DB.prepare(`
         INSERT INTO meta_ad_metrics (
           ad_id, date_ref, account_id, ad_name, adset_id, adset_name,
-          campaign_id, campaign_name, spend, impressions, clicks,
+          campaign_id, campaign_name, campaign_objective, spend, impressions, clicks,
           reach, cpm, ctr, frequency, link_clicks, link_ctr,
           resultados, custo_resultado, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
         ON CONFLICT(ad_id, date_ref) DO UPDATE SET
-          account_id      = excluded.account_id,
-          ad_name         = excluded.ad_name,
-          spend           = excluded.spend,
-          impressions     = excluded.impressions,
-          clicks          = excluded.clicks,
-          reach           = excluded.reach,
-          cpm             = excluded.cpm,
-          ctr             = excluded.ctr,
-          frequency       = excluded.frequency,
-          link_clicks     = excluded.link_clicks,
-          link_ctr        = excluded.link_ctr,
-          resultados      = excluded.resultados,
-          custo_resultado = excluded.custo_resultado,
-          updated_at      = datetime('now')
+          account_id         = excluded.account_id,
+          ad_name            = excluded.ad_name,
+          campaign_objective = excluded.campaign_objective,
+          spend              = excluded.spend,
+          impressions        = excluded.impressions,
+          clicks             = excluded.clicks,
+          reach              = excluded.reach,
+          cpm                = excluded.cpm,
+          ctr                = excluded.ctr,
+          frequency          = excluded.frequency,
+          link_clicks        = excluded.link_clicks,
+          link_ctr           = excluded.link_ctr,
+          resultados         = excluded.resultados,
+          custo_resultado    = excluded.custo_resultado,
+          updated_at         = datetime('now')
       `).bind(
         row.ad_id,
         row.date_start,
@@ -69,6 +70,7 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
         row.adset_name,
         row.campaign_id,
         row.campaign_name,
+        row.objective ?? '',
         parseFloat(row.spend ?? '0'),
         parseInt(row.impressions ?? '0', 10),
         parseInt(row.clicks ?? '0', 10),

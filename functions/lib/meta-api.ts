@@ -10,6 +10,7 @@ interface MetaInsightRow {
   adset_name: string;
   campaign_id: string;
   campaign_name: string;
+  objective?: string;
   spend: string;
   impressions: string;
   cpm: string;
@@ -55,6 +56,7 @@ export async function fetchMetaInsights(
 ): Promise<MetaInsightRow[]> {
   const fields = [
     'ad_id', 'ad_name', 'adset_id', 'adset_name', 'campaign_id', 'campaign_name',
+    'objective',
     'spend', 'impressions', 'cpm', 'clicks', 'ctr', 'reach', 'frequency',
     'actions', 'cost_per_action_type', 'inline_link_clicks', 'inline_link_click_ctr',
   ].join(',');

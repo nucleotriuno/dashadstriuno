@@ -1,28 +1,32 @@
 -- NOTE: updated_at uses DEFAULT (datetime('now')) for INSERT only.
 -- Upsert SQL must explicitly set updated_at = datetime('now') in ON CONFLICT DO UPDATE SET.
 
+-- MIGRATION (run once on existing D1 databases):
+-- ALTER TABLE meta_ad_metrics ADD COLUMN campaign_objective TEXT DEFAULT '';
+
 -- Meta ad metrics (daily, per ad)
 CREATE TABLE IF NOT EXISTS meta_ad_metrics (
-  ad_id           TEXT NOT NULL,
-  date_ref        TEXT NOT NULL,
-  account_id      TEXT NOT NULL DEFAULT '',
-  ad_name         TEXT,
-  adset_id        TEXT,
-  adset_name      TEXT,
-  campaign_id     TEXT,
-  campaign_name   TEXT,
-  spend           REAL DEFAULT 0,
-  impressions     INTEGER DEFAULT 0,
-  clicks          INTEGER DEFAULT 0,
-  reach           INTEGER DEFAULT 0,
-  cpm             REAL DEFAULT 0,
-  ctr             REAL DEFAULT 0,
-  frequency       REAL DEFAULT 0,
-  link_clicks     INTEGER DEFAULT 0,
-  link_ctr        REAL DEFAULT 0,
-  resultados      INTEGER DEFAULT 0,
-  custo_resultado REAL DEFAULT 0,
-  updated_at      TEXT DEFAULT (datetime('now')),
+  ad_id               TEXT NOT NULL,
+  date_ref            TEXT NOT NULL,
+  account_id          TEXT NOT NULL DEFAULT '',
+  ad_name             TEXT,
+  adset_id            TEXT,
+  adset_name          TEXT,
+  campaign_id         TEXT,
+  campaign_name       TEXT,
+  campaign_objective  TEXT DEFAULT '',
+  spend               REAL DEFAULT 0,
+  impressions         INTEGER DEFAULT 0,
+  clicks              INTEGER DEFAULT 0,
+  reach               INTEGER DEFAULT 0,
+  cpm                 REAL DEFAULT 0,
+  ctr                 REAL DEFAULT 0,
+  frequency           REAL DEFAULT 0,
+  link_clicks         INTEGER DEFAULT 0,
+  link_ctr            REAL DEFAULT 0,
+  resultados          INTEGER DEFAULT 0,
+  custo_resultado     REAL DEFAULT 0,
+  updated_at          TEXT DEFAULT (datetime('now')),
   PRIMARY KEY (ad_id, date_ref)
 );
 
